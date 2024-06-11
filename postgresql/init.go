@@ -1,4 +1,4 @@
-package storage
+package postgresql
 
 import (
 	"auth-service/config"
@@ -8,18 +8,15 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type DB struct {
-	conn *sql.DB
-}
-
-func NewDB(cf *config.Config) (*DB, error) {
+func ConnectDB(cf *config.Config) (*sql.DB, error) {
 	dbConn := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable", cf.DB_USER, cf.DB_PASSWORD, cf.DB_HOST, cf.DB_PORT, cf.DB_NAME)
-	conn, err := sql.Open("postgres", dbConn)
+	db, err := sql.Open("postgres", dbConn)
 	if err != nil {
 		return nil, err
 	}
-	if err := conn.Ping(); err != nil {
+	err = db.Ping()
+	if err != nil {
 		return nil, err
 	}
-	return &DB{conn: conn}, nil
+	return db, nil
 }

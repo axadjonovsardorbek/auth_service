@@ -1,54 +1,35 @@
 package service
 
 import (
-	m "auth-service/models"
-	"fmt"
-	"log"
-	"net/rpc"
+	"auth-service/models"
+	"auth-service/postgresql/managers"
+	"database/sql"
+
+	"github.com/google/uuid"
 )
 
 type UserService struct {
-	Client *rpc.Client
+	UM managers.UserManager
 }
 
-func NewUserService(client *rpc.Client) *UserService {
-	return &UserService{Client: client}
+func NewUserService(conn *sql.DB) *UserService {
+	return &UserService{UM: *managers.NewUserManager(conn)}
 }
 
-func (u *UserService) Register(req m.RegisterReq) (*m.User, error) {
-	res := new(m.User)
-
-	err := u.Client.Call("User.Register", req, &res)
-	if err != nil {
-		log.Fatal("Client invocation error: ", err)
-		return nil, err
-	}
-
-	return res, nil
+func (u *UserService) Register(req *models.RegisterReq) error {
+	req.ID = uuid.NewString()
+	return u.UM.Register(*req)
 }
 
-func (u *UserService) GetUser(id int) (*m.UserRes, error) {
-	res := new(m.UserRes)
+// func (u *UserService) Login(req *models.LoginReq) bool {
+// 	return false
 
-	err := u.Client.Call("User.GetUserData", id, &res)
-	if err != nil {
-		log.Fatal(err)
-		return nil, err
-	}
+// }
 
-	return res, nil
+func (u *UserService) GetProfile(req *models.GetProfileReq) (*models.GetProfileResp, error) {
+	return u.UM.Profile(*req)
 }
 
-func (u *UserService) Login(req *m.LoginReq) bool {
-	res := new(m.LoginRes)
-
-	fmt.Println(req)
-
-	err := u.Client.Call("User.Login", req, &res)
-	if err != nil {
-		log.Println(err)
-		return false
-	}
-
-	return res.Correct
+func (u *UserService) EmailExists(email string) (bool, error) {
+	return u.UM.EmailExists(email)
 }

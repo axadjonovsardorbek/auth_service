@@ -1,10 +1,15 @@
 package handlers
 
-import "auth-service/service"
+import (
+	"auth-service/config/logger"
+	"auth-service/service"
+)
 
-type Handler struct {
+type HTTPHandler struct {
+	US     *service.UserService
+	Logger logger.Logger
 }
 
-func NewHandler(userService *service.UserService) *Handler {
-	return &Handler{}
+func NewHandler(us *service.UserService, l logger.Logger) *HTTPHandler {
+	return &HTTPHandler{US: us, Logger: l}
 }

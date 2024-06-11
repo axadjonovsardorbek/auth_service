@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/login": {
             "post": {
-                "description": "This api registers user",
+                "description": "Authenticate user with email and password",
                 "consumes": [
                     "application/json"
                 ],
@@ -25,13 +25,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "USER"
+                    "auth"
                 ],
-                "summary": "Login USER",
+                "summary": "Login a user",
                 "parameters": [
                     {
-                        "description": "LoginReq",
-                        "name": "data",
+                        "description": "User login credentials",
+                        "name": "credentials",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -40,54 +40,20 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created",
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/token.Tokens"
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid request payload",
                         "schema": {
                             "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/register/user": {
-            "post": {
-                "description": "This api registers user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "USER"
-                ],
-                "summary": "REGISTER USER",
-                "parameters": [
-                    {
-                        "description": "UserReq",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handler.UserReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/models.UserReq"
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "401": {
+                        "description": "Invalid email or password",
                         "schema": {
                             "type": "string"
                         }
@@ -95,14 +61,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/user": {
+        "/profile": {
             "get": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "This api GETS user by id",
+                "description": "Get the profile of the authenticated user",
                 "consumes": [
                     "application/json"
                 ],
@@ -110,33 +76,30 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "USER"
+                    "auth"
                 ],
-                "summary": "GET USER",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "ID",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
+                "summary": "Get user profile",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.UserReq"
+                            "$ref": "#/definitions/models.GetProfileResp"
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "404": {
-                        "description": "Not Found",
+                        "description": "User not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
                         "schema": {
                             "type": "string"
                         }
@@ -144,9 +107,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/users": {
-            "get": {
-                "description": "This api GETS allusers",
+        "/register": {
+            "post": {
+                "description": "Register a new user with email, username, and password",
                 "consumes": [
                     "application/json"
                 ],
@@ -154,24 +117,35 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "USER"
+                    "auth"
                 ],
-                "summary": "GET USERS",
-                "responses": {
-                    "200": {
-                        "description": "OK",
+                "summary": "Register a new user",
+                "parameters": [
+                    {
+                        "description": "User registration request",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UserReq"
+                            "$ref": "#/definitions/models.RegisterReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.RegisterReq"
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid request payload",
                         "schema": {
                             "type": "string"
                         }
                     },
-                    "404": {
-                        "description": "Not Found",
+                    "500": {
+                        "description": "Server error",
                         "schema": {
                             "type": "string"
                         }
@@ -181,19 +155,23 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "handler.UserReq": {
+        "models.GetProfileResp": {
             "type": "object",
             "properties": {
-                "age": {
-                    "type": "integer"
+                "email": {
+                    "description": "User's email address",
+                    "type": "string"
                 },
-                "name": {
+                "id": {
+                    "description": "User's unique identifier",
                     "type": "string"
                 },
                 "password": {
+                    "description": "User's password",
                     "type": "string"
                 },
                 "username": {
+                    "description": "User's username",
                     "type": "string"
                 }
             }
@@ -202,26 +180,32 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "password": {
+                    "description": "User's password",
                     "type": "string"
                 },
                 "username": {
+                    "description": "User's username",
                     "type": "string"
                 }
             }
         },
-        "models.UserReq": {
+        "models.RegisterReq": {
             "type": "object",
             "properties": {
-                "age": {
-                    "type": "integer"
+                "email": {
+                    "description": "User's email address",
+                    "type": "string"
                 },
-                "name": {
+                "id": {
+                    "description": "User's unique identifier",
                     "type": "string"
                 },
                 "password": {
+                    "description": "User's password",
                     "type": "string"
                 },
                 "username": {
+                    "description": "User's username",
                     "type": "string"
                 }
             }
@@ -251,9 +235,9 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "",
 	Host:             "",
-	BasePath:         "/v1",
+	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "N10 group swagger UI",
+	Title:            "",
 	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

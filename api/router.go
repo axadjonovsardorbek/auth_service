@@ -1,23 +1,32 @@
 package api
 
 import (
-	"auth-service/api/handlers"
+	// "github.com/gin-contrib/cors"
+
 	"github.com/gin-gonic/gin"
+
+	swaggerFiles "github.com/swaggo/files"
+
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "auth-service/api/docs"
+	"auth-service/api/handlers"
+	"auth-service/api/middleware"
 )
 
-func NewRouter(userHandler *handlers.UserHandler) *gin.Engine {
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+func NewRouter(h *handlers.HTTPHandler) *gin.Engine {
 	router := gin.Default()
 
-	// Middleware
-	router.Use(handlers.AuthMiddleware())
+	router.GET("/api/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	v1 := router.Group("/v1")
-	{
-		v1.POST("/register/user", userHandler.Register)
-		v1.POST("/login", userHandler.Login)
-		v1.GET("/user", userHandler.GetUser)
-		v1.GET("/users", userHandler.GetUsers)
-	}
+	router.POST("/register", h.Register)
+	router.POST("/login", h.Login)
+
+	protected := router.Group("/", middleware.JWTMiddleware())
+	protected.GET("/profile/:id", h.Profile)
 
 	return router
 }

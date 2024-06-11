@@ -1,32 +1,41 @@
-basePath: /v1
 definitions:
-  handler.UserReq:
+  models.GetProfileResp:
     properties:
-      age:
-        type: integer
-      name:
+      email:
+        description: User's email address
+        type: string
+      id:
+        description: User's unique identifier
         type: string
       password:
+        description: User's password
         type: string
       username:
+        description: User's username
         type: string
     type: object
   models.LoginReq:
     properties:
       password:
+        description: User's password
         type: string
       username:
+        description: User's username
         type: string
     type: object
-  models.UserReq:
+  models.RegisterReq:
     properties:
-      age:
-        type: integer
-      name:
+      email:
+        description: User's email address
+        type: string
+      id:
+        description: User's unique identifier
         type: string
       password:
+        description: User's password
         type: string
       username:
+        description: User's username
         type: string
     type: object
   token.Tokens:
@@ -38,114 +47,96 @@ definitions:
     type: object
 info:
   contact: {}
-  title: N10 group swagger UI
 paths:
   /login:
     post:
       consumes:
       - application/json
-      description: This api registers user
+      description: Authenticate user with email and password
       parameters:
-      - description: LoginReq
+      - description: User login credentials
         in: body
-        name: data
+        name: credentials
         required: true
         schema:
           $ref: '#/definitions/models.LoginReq'
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
+        "200":
+          description: OK
           schema:
             $ref: '#/definitions/token.Tokens'
         "400":
-          description: Bad Request
+          description: Invalid request payload
           schema:
             type: string
-      summary: Login USER
-      tags:
-      - USER
-  /register/user:
-    post:
-      consumes:
-      - application/json
-      description: This api registers user
-      parameters:
-      - description: UserReq
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/handler.UserReq'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/models.UserReq'
-        "400":
-          description: Bad Request
+        "401":
+          description: Invalid email or password
           schema:
             type: string
-      summary: REGISTER USER
+      summary: Login a user
       tags:
-      - USER
-  /user:
+      - auth
+  /profile:
     get:
       consumes:
       - application/json
-      description: This api GETS user by id
-      parameters:
-      - description: ID
-        in: query
-        name: id
-        required: true
-        type: string
+      description: Get the profile of the authenticated user
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.UserReq'
-        "400":
-          description: Bad Request
+            $ref: '#/definitions/models.GetProfileResp'
+        "401":
+          description: Unauthorized
           schema:
             type: string
         "404":
-          description: Not Found
+          description: User not found
+          schema:
+            type: string
+        "500":
+          description: Server error
           schema:
             type: string
       security:
       - BearerAuth: []
-      summary: GET USER
+      summary: Get user profile
       tags:
-      - USER
-  /users:
-    get:
+      - auth
+  /register:
+    post:
       consumes:
       - application/json
-      description: This api GETS allusers
+      description: Register a new user with email, username, and password
+      parameters:
+      - description: User registration request
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.RegisterReq'
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
-            $ref: '#/definitions/models.UserReq'
+            $ref: '#/definitions/models.RegisterReq'
         "400":
-          description: Bad Request
+          description: Invalid request payload
           schema:
             type: string
-        "404":
-          description: Not Found
+        "500":
+          description: Server error
           schema:
             type: string
-      summary: GET USERS
+      summary: Register a new user
       tags:
-      - USER
+      - auth
 securityDefinitions:
   BearerAuth:
     in: header
