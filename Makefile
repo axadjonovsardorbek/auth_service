@@ -10,13 +10,13 @@ init:
 	go mod vendor
 	
 migrate_up:
-	migrate -path migrations -database postgres://postgres:1111@localhost:5432/auth?sslmode=disable -verbose up
+	migrate -path migrations -database postgres://mrbek:QodirovCoder@localhost:5432/auth_db -verbose up
 
 migrate_down:
-	migrate -path migrations -database postgres://postgres:1111@localhost:5432/auth?sslmode=disable -verbose down
+	migrate -path migrations -database postgres://mrbek:QodirovCoder@localhost:5432/auth_db -verbose down
 
 migrate_force:
-	migrate -path migrations -database postgres://postgres:1111@localhost:5432/auth?sslmode=disable -verbose force 1
+	migrate -path migrations -database postgres://mrbek:QodirovCoder@localhost:5432/auth_db -verbose force 1
 
 migrate_file:
 	migrate create -ext sql -dir migrations -seq create_table
