@@ -1,8 +1,6 @@
 package api
 
 import (
-	// "github.com/gin-contrib/cors"
-
 	"github.com/gin-gonic/gin"
 
 	swaggerFiles "github.com/swaggo/files"
@@ -28,5 +26,6 @@ func NewRouter(h *handlers.HTTPHandler) *gin.Engine {
 	protected := router.Group("/", middleware.JWTMiddleware())
 	protected.GET("/profile", h.Profile)
 
+	router.GET("/user/:id", h.GetByID)
 	return router
 }
